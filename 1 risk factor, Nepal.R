@@ -6,8 +6,6 @@ rm(list=ls())
 
 #load libraries
 library(rjags)
-# library(coda)
-# library(mcmcplots)
 load.module("mix") #this is for the normal mixture models, for sensitivity
 
 set.seed(12)
@@ -78,6 +76,7 @@ p_HC[a] <- (true.rate[a]*100000)/final.inc[a]
 
 }"
 
+#normal mixture model parameters
 mu.u5  <- read.csv("nep.sens.u5.finaltbl.csv")[1,-1]
 tau.u5 <- read.csv("nep.sens.u5.finaltbl.csv")[2,-1]
 pi.u5  <- read.csv("nep.sens.u5.finaltbl.csv")[3,-1]
@@ -101,15 +100,6 @@ pi.30plus  <- read.csv("nep.sens.30plus.finaltbl.csv")[3,-1]
 mu.all  <- read.csv("nep.sens.all.finaltbl.csv")[1,-1]
 tau.all <- read.csv("nep.sens.all.finaltbl.csv")[2,-1]
 pi.all  <- read.csv("nep.sens.all.finaltbl.csv")[3,-1]
-
-
-#divide results dataset into age categories
-nepu5 <- nep_results[which(nep_results$agecat==1),]
-nep5_9 <- nep_results[which(nep_results$agecat==2),]
-nep10_14 <- nep_results[which(nep_results$agecat==3),]
-nep15_29 <- nep_results[which(nep_results$agecat==4),]
-nep30plus <- nep_results[which(nep_results$agecat==5),]
-nepall <- nep_results
 
 #set alpha, beta parameters for beta distributions in model
 #pulled from HUS
@@ -146,6 +136,14 @@ persontime <- c(6282*2,
                 48640*2,
                 6282*2+6743*2+7585*2+32472*2+48640*2) 
 
+#divide results dataset into age categories
+nepu5 <- nep_results[which(nep_results$agecat==1),]
+nep5_9 <- nep_results[which(nep_results$agecat==2),]
+nep10_14 <- nep_results[which(nep_results$agecat==3),]
+nep15_29 <- nep_results[which(nep_results$agecat==4),]
+nep30plus <- nep_results[which(nep_results$agecat==5),]
+nepall <- nep_results
+
 #number of positive BC results, by agecat
 n.BCpos <- c(sum(nep_results$result[which(nep_results$agecat==1)]),
              sum(nep_results$result[which(nep_results$agecat==2)]),
@@ -157,7 +155,7 @@ n.BCpos <- c(sum(nep_results$result[which(nep_results$agecat==1)]),
 #check crude incidence
 (n.BCpos/persontime)*100000
 
-#list of all parameters to use
+#list of all input variables
 jdat.n <- list(n.BCpos=n.BCpos, persontime=persontime, 
                mu.u5=mu.u5,tau.u5=tau.u5,pi.u5=pi.u5,mu.5_9=mu.5_9,tau.5_9=tau.5_9,pi.5_9=pi.5_9,
                mu.10_14=mu.10_14,tau.10_14=tau.10_14,pi.10_14=pi.10_14,mu.15_29=mu.15_29,tau.15_29=tau.15_29,pi.15_29=pi.15_29,
