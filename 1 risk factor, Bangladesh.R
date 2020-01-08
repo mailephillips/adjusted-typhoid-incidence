@@ -13,10 +13,10 @@ set.seed(1)
 #set working directory to unzipped folder with data
 setwd("~/Desktop/Typhoid Underreporting/Bangladesh")
 
-#load typhoid results dataset
-bang_results <- read.csv(file = "Bangladesh Results DS 8.22.19.csv")
 
-#model
+#########################
+#########MODEL###########
+#########################
 jcode.b <-"
 model{
 
@@ -74,6 +74,13 @@ p_HC[a] <- (true.rate[a]*100000)/final.inc[a]
 
 
 }"
+
+#########################
+####INPUT PARAMETERS#####
+#########################
+
+#load typhoid results dataset
+bang_results <- read.csv(file = "Bangladesh Results DS 8.22.19.csv")
 
 #normal mixture model parameters
 mu.u5  <- read.csv("bang.sens.u5.finaltbl.csv")[1,-1]
@@ -154,6 +161,11 @@ n.BCpos <- c(sum(bang_results$result[which(bang_results$agecat==1)]),
 #check crude incidence
 (n.BCpos/persontime)*100000
 
+
+#########################
+#######RUN MODEL#########
+#########################
+
 #list of all input variables
 jdat.b <- list(n.BCpos=n.BCpos, persontime=persontime, 
                mu.u5=mu.u5,tau.u5=tau.u5,pi.u5=pi.u5,mu.5_9=mu.5_9,tau.5_9=tau.5_9,pi.5_9=pi.5_9,
@@ -175,12 +187,23 @@ update(jmod.b,10000)
 jpost.b <- coda.samples(jmod.b, thin=3, c(
                                       'p_HCfev', 'p0','p1', 'f0', 'f1',
                                       'S0','S1','RR_F','RR_TF', 
-                                      'lambda_0', 'final.inc', 'true.rate'
+                                      'lambda_0', 'final.inc', 'true.rate',
+                                      'p_BC','p_BCpos','p_HC'
                                       ), n.iter=100000) 
+
+
+#########################
+######DIAGNOSTICS########
+#########################
 
 #check for convergence (quickly); do more thoroughly
 #might have to run a few times to get full convergence (mixture models are difficult)
 (gelman.diag(jpost.b, multivariate = FALSE))
+
+
+#########################
+#######POSTERIOR#########
+#########################
 
 #extract posterior summaries
 sum.post.b <- summary(jpost.b)
