@@ -11,7 +11,7 @@ load.module("mix") #this is for the normal mixture models, for sensitivity
 #set working directory to unzipped folder with data
 setwd("~/Desktop/Typhoid Underreporting/Malawi")
 
-set.seed(123456)
+set.seed(01234567)
 
 #########################
 #########MODEL###########
@@ -65,8 +65,10 @@ final.inc[a] <- (RR_TF*lambda_0[a]*p1[a]+lambda_0[a]*p0[a])*100000
 
 #probability of healthcare seeking
 p_HC[a] <- (true.rate[a]*100000)/final.inc[a]
-}
 
+#adjustment factors
+adj.fact[a] <- final.inc[a]/((n.BCpos[a]/persontime[a])*100000)
+}
 
 }"
 
@@ -196,7 +198,7 @@ jpost.m <- coda.samples(jmod.m, thin=3, c(
   'p_HCfev', 'p0','p1', 'f0', 'f1',
   'S0','S1','RR_F','RR_TF', 
   'lambda_0', 'final.inc','true.rate',
-  'p_BC','p_BCpos','p_HC'
+  'p_BC','p_BCpos','p_HC', 'adj.fact'
 ), n.iter=500000) 
 
 
@@ -216,14 +218,12 @@ jpost.m <- coda.samples(jmod.m, thin=3, c(
 #extract posterior summaries
 sum.post.m <- summary(jpost.m)
 
-#view posterior summery of quantiles
-View(round(sum.post.m$quantiles,0))
-
 #overall adjustment ratios
-round(sum.post.m$quantiles[32:37,3]/((n.BCpos/persontime)*100000),1)
+round(sum.post.m$quantiles[20:25,c(3,1,5)],1)
 
 #final adjusted rates
-round(sum.post.m$quantiles[32:37,c(3,1,5)],0)
+round(sum.post.m$quantiles[38:43,c(3,1,5)],0)
 
 #posterior probabilities
-View(round(sum.post.m$quantiles[c(56:73),c(3,1,5)],2))
+round(sum.post.m$quantiles[c(62:79),c(3,1,5)],2)
+
