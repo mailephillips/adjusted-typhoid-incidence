@@ -8,7 +8,7 @@ rm(list=ls())
 library(rjags)
 load.module("mix") #this is for the normal mixture models, for sensitivity
 
-set.seed(12345678)
+set.seed(0)
 
 #set working directory to unzipped folder with data
 setwd("~/Desktop/Typhoid Underreporting/Bangladesh")
@@ -35,10 +35,11 @@ logRR_BCpos ~ dnorm(log(1.87),1/0.3731117^2)
 for (a in 1:6){
 #probability of receiving a blood culture (without adjustment)
 p_BC[a] ~ dbeta(alpha.bc[a],beta.bc[a])
+p_BC.adj[a] <- (1-(1-p_BC[a])*(1/RR_BCpos)) 
 
 #obs rate --> true rate (not per 100,000 pyo yet), adjusted for sensitivity, pr(BC)
 n.BCpos[a] ~ dpois(lambda.obs[a]) # positive BC results ~ poisson
-lambda.obs[a] <- lambda.true[a]*p_BCpos[a]*(1-(1-p_BC[a])*(1/RR_BCpos)) 
+lambda.obs[a] <- lambda.true[a]*p_BCpos[a]*p_BC.adj[a]
 log(lambda.true[a]) <- beta0[a] + log(persontime[a])  #adjust for persontime
 true.cases[a] ~ dpois(lambda.true[a])
 beta0[a] ~ dnorm(0, 1/100000000)  #weakly informative prior for the intercept
@@ -193,7 +194,7 @@ jpost.b <- coda.samples(jmod.b, thin=3, c(
                                       'p_HCfev', 'p0','p1', 'f0', 'f1',
                                       'S0','S1','RR_F','RR_TF', 
                                       'lambda_0', 'final.inc', 'true.rate',
-                                      'p_BC','p_BCpos','p_HC', 'adj.fact'
+                                      'p_BC.adj','p_BCpos','p_HC', 'adj.fact'
                                       ), n.iter=100000) 
 
 
