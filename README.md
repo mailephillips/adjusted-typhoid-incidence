@@ -11,7 +11,7 @@ The 4 simulated scenarios are:
 (1) low prob of seeking care, high prob of being tested, low prior antibiotic usage
 (2) low prob of seeking care, high prob of being tested, high prior antibiotic usage
 (3) high prob of seeking care, low prob of being tested, low prior antibiotic usage
-(4) high prob of seeking care, low prob of being tested, high prior antibiotic usage
+(4) high prob of seeking care, low prob of being tested, high prior antibiotic usage. 
 The 5 variables are : 
 - `TFpositive`: Whether an individual had a positive blood culture result (if they were tested)
 - `bctest`: Whether an individual received a blood culture test
