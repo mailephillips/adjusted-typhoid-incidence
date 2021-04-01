@@ -8,21 +8,22 @@ library(rjags)
 load.module("mix") #this is for the normal mixture models, for sensitivity
 library(R.matlab)
 
-# set.seed(0)
+# set.seed(32456789) #987654321
 set.seed(012)
 #########################
 ####INPUT PARAMETERS#####
 #########################
 #load data 
-ds <- readMat('strataa_datasim.mat')
+setwd("~/adjusted typhoid incidence")
+ds <- readMat('strataa_simulated_data.mat')
 
 names(ds)
 # [1] "TFpositive" "bctest"     "fever"      "riskfactor"  "soughtcare"
 
 # define number of samples from HUS to use
-# nsamp <- 735
+nsamp <- 735
 # nsamp <- 1000
-nsamp <- 2000
+# nsamp <- 2000
 
 # create indices for random samples (from HUS)
 samp.n1 <- sample(1:dim(ds$soughtcare)[1],size = nsamp, replace = F)
@@ -133,15 +134,15 @@ jpost <- coda.samples(jmod, thin=3, c(
 #extract posterior summaries
 sum.post <- summary(jpost)
 
-#overall adjustment ratios
-# round(sum.post$quantiles[14:17,c(3,1,5)],1)
 
-#final adjusted rates
 round(sum.post$quantiles[14:17,c(3,1,5)],0)
 
-#posterior probabilities
-round(sum.post$quantiles[c(5:13),c(3,1,5)],2)
+cbind(round(sum.post$quantiles[c(5:8,rep(9,4),10:13),c(3,1,5)],2), c(.95,.95,.68,.68,.56,.55,.56,.55,.175,.175,.65,.65))
 
+# View(cbind(1:length(sum.post$quantiles[,1]),round(sum.post$quantiles,1)))
 
+setwd("~/Desktop/Bayesian STRATAA Analysis/simulation results")
 est.inc  <- data.frame(round(sum.post$quantiles[14:17,c(3,1,5)],0))
-est.prob <- data.frame(round(sum.post$quantiles[c(5:8,9,9,9,9,10:13),c(3,1,5)],2))
+est.prob <- data.frame(round(sum.post$quantiles[c(5:8,rep(9,4),10:13),c(3,1,5)],2))
+write.csv(est.inc,paste0("estimated inc ",nsamp,"noadj",".csv"))
+write.csv(est.prob,paste0("estimated prob ",nsamp,"noadj",".csv"))
